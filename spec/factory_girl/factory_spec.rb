@@ -219,6 +219,17 @@ describe Factory do
       @factory.build_class.should == User
     end
 
+    describe "when defined with a class name containing a slash" do
+      before do
+        @class = Admin::Setting
+        @factory = Factory.new('admin/setting')
+      end
+      
+      it "should guess a build class inside a module" do
+        @factory.build_class.should == @class
+      end
+    end
+
     describe "when defined with a custom class" do
       before do
         @class   = User

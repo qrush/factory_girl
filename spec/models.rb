@@ -41,3 +41,9 @@ class Post < ActiveRecord::Base
   validates_presence_of :name, :author_id
   belongs_to :author, :class_name => 'User'
 end
+
+module Admin
+  class Setting
+    
+  end
+end

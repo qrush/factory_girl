@@ -30,7 +30,9 @@ class Factory
   #
   # Options:
   # * class: +Symbol+, +Class+, or +String+
-  #   The class that will be used when generating instances for this factory. If not specified, the class will be guessed from the factory name.
+  #   The class that will be used when generating instances for this factory.
+  #   If not specified, the class will be guessed from the factory name.
+  #   A slash in the factory name is used to indicate a class inside a module.
   # * parent: +Symbol+
   #   The parent factory. If specified, the attributes from the parent
   #   factory will be copied to the current one with an ability to override
@@ -301,7 +303,13 @@ class Factory
   
   def class_for (class_or_to_s)
     if class_or_to_s.respond_to?(:to_sym)
-      Object.const_get(variable_name_to_class_name(class_or_to_s))
+      names = variable_name_to_class_name(class_or_to_s).split('::')
+      names.shift if names.empty? || names.first.empty?
+      constant = Object
+      names.each do |name|
+        constant = constant.const_defined?(name) ? constant.const_get(name) : constant.const_missing(name)
+      end
+      constant
     else
       class_or_to_s
     end
