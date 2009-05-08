@@ -412,6 +412,26 @@ describe Factory do
     end
   end
 
+  describe 'defining default strategy globally' do
+    before do
+      @backup_global_default_strategy = Factory.global_default_strategy
+    end
+
+    it "should have a 'create' strategy by default" do
+      Factory.global_default_strategy.should == :create
+    end
+
+    it "should create a new factory with globally defined default strategy " do
+      Factory.global_default_strategy = :build
+      factory = Factory.define(:object) {}
+      factory.default_strategy.should == :build
+    end
+
+    after do
+      Factory.global_default_strategy = @backup_global_default_strategy
+    end
+  end
+
   def self.in_directory_with_files(*files)
     before do
       @pwd = Dir.pwd

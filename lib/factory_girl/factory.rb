@@ -12,10 +12,15 @@ class Factory
     # "factories," "test/factories," and "spec/factories." Only the first
     # existing file will be loaded.
     attr_accessor :definition_file_paths
+
+    # Defines a +default_strategy+ for all factories.
+    # Defaults to :create.
+    attr_accessor :global_default_strategy
   end
 
   self.factories = {}
   self.definition_file_paths = %w(factories test/factories spec/factories)
+  self.global_default_strategy = :create
 
   attr_reader :factory_name #:nodoc:
   attr_reader :attributes #:nodoc:
@@ -37,7 +42,7 @@ class Factory
   #   them.
   # * default_strategy: +Symbol+
   #   The strategy that will be used by the Factory shortcut method.
-  #   Defaults to :create.
+  #   Defaults to +global_default_strategy+.
   #
   # Yields: +Factory+
   # The newly created factory.
@@ -59,7 +64,7 @@ class Factory
   end
   
   def default_strategy #:nodoc:
-    @options[:default_strategy] || :create
+    @options[:default_strategy] || self.class.global_default_strategy
   end
 
   def initialize (name, options = {}) #:nodoc:
@@ -254,7 +259,7 @@ class Factory
   end
   
   # Executes the default strategy for the given factory. This is usually create,
-  # but it can be overridden for each factory.
+  # but it can be overridden by Factory#global_default_strategy or for each factory.
   #
   # Arguments:
   # * name: +Symbol+ or +String+
