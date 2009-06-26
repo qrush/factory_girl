@@ -48,6 +48,21 @@ describe Factory do
       @factory.default_strategy.should == :create
     end
 
+    it "should return static attribute  when asked for a type" do
+      result = @factory.type
+      result.should be_kind_of(Array)
+      result.first.should be_kind_of(Factory::Attribute::Static)
+      result.first.name.should == :type
+    end
+
+    it "should define type as an attribute" do
+      @factory.type { "it's a type" }
+      attributes = @factory.attributes
+      attributes.should be_kind_of(Array)
+      attributes.size.should == 1
+      attributes.first.name.should == :type
+    end
+
     it "should define a static attribute when an attribute is defined with a value" do
       attribute = 'attribute'
       stub(attribute).name { :name }
