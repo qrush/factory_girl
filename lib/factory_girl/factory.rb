@@ -1,5 +1,6 @@
 class Factory
   undef :type
+  undef :id
 
   # Raised when a factory is defined that attempts to instantiate itself.
   class AssociationDefinitionError < RuntimeError

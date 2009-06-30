@@ -70,6 +70,21 @@ describe Factory do
       @factory.define_attribute(:name, 'value')
     end
 
+    it "should return static attribute when asked for the id" do
+      result = @factory.id
+      result.should be_kind_of(Array)
+      result.first.should be_kind_of(Factory::Attribute::Static)
+      result.first.name.should == :id
+    end
+
+    it "should define id as an attribute" do
+      @factory.id { "it's an id" }
+      attributes = @factory.attributes
+      attributes.should be_kind_of(Array)
+      attributes.size.should == 1
+      attributes.first.name.should == :id
+    end
+
     it "should define a dynamic attribute when an attribute is defined with a block" do
       attribute = 'attribute'
       stub(attribute).name { :name }
