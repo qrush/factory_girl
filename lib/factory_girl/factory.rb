@@ -43,10 +43,10 @@ class Factory
   # The newly created factory.
   def self.define (name, options = {})
     instance = Factory.new(name, options)
-    yield(instance)
     if parent = options.delete(:parent)
       instance.inherit_from(Factory.factory_by_name(parent))
     end    
+    yield(instance)
     self.factories[instance.factory_name] = instance
   end
   
@@ -96,7 +96,7 @@ class Factory
   #   generated instances.
   # * value: +Object+
   #   If no block is given, this value will be used for this attribute.
-  def add_attribute (name, value = nil, &block)
+  def define_attribute (name, value = nil, &block)
     if block_given?
       if value
         raise AttributeDefinitionError, "Both value and block given"
@@ -108,13 +108,14 @@ class Factory
     end
 
     if attribute_defined?(attribute.name)
-      raise AttributeDefinitionError, "Attribute already defined: #{name}"
+      existant_attribute = @attributes.find {|a| a.name == attribute.name }
+      @attributes[@attributes.index(existant_attribute)] = attribute
+    else
+      @attributes << attribute
     end
-
-    @attributes << attribute
   end
 
-  # Calls add_attribute using the missing method name as the name of the
+  # Calls define_attribute using the missing method name as the name of the
   # attribute, so that:
   #
   #   Factory.define :user do |f|
@@ -124,12 +125,12 @@ class Factory
   # and:
   #
   #   Factory.define :user do |f|
-  #     f.add_attribute :name, 'Billy Idol'
+  #     f.define_attribute :name, 'Billy Idol'
   #   end
   #
   # are equivilent. 
   def method_missing (name, *args, &block)
-    add_attribute(name, *args, &block)
+    define_attribute(name, *args, &block)
   end
 
   # Adds an attribute that builds an association. The associated instance will
@@ -181,7 +182,7 @@ class Factory
   # Except that no globally available sequence will be defined.
   def sequence (name, &block)
     s = Sequence.new(&block)
-    add_attribute(name) { s.next }
+    define_attribute(name) { s.next }
   end
   
   # Generates and returns a Hash of attributes from this factory. Attributes

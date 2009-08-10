@@ -48,40 +48,40 @@ describe Factory do
       @factory.default_strategy.should == :create
     end
 
-    it "should not allow the same attribute to be added twice" do
-      lambda {
-        2.times { @factory.add_attribute :first_name }
-      }.should raise_error(Factory::AttributeDefinitionError)
-    end
-
-    it "should add a static attribute when an attribute is defined with a value" do
+    it "should define a static attribute when an attribute is defined with a value" do
       attribute = 'attribute'
       stub(attribute).name { :name }
       mock(Factory::Attribute::Static).new(:name, 'value') { attribute }
-      @factory.add_attribute(:name, 'value')
+      @factory.define_attribute(:name, 'value')
     end
 
-    it "should add a dynamic attribute when an attribute is defined with a block" do
+    it "should define a dynamic attribute when an attribute is defined with a block" do
       attribute = 'attribute'
       stub(attribute).name { :name }
       block     = lambda {}
       mock(Factory::Attribute::Dynamic).new(:name, block) { attribute }
-      @factory.add_attribute(:name, &block)
+      @factory.define_attribute(:name, &block)
+    end
+
+    it "should allow the same attribute to be defined twice" do
+      lambda {
+        2.times { @factory.define_attribute :first_name }
+      }.should_not raise_error(Factory::AttributeDefinitionError)
     end
 
     it "should raise for an attribute with a value and a block" do
       lambda {
-        @factory.add_attribute(:name, 'value') {}
+        @factory.define_attribute(:name, 'value') {}
       }.should raise_error(Factory::AttributeDefinitionError)
     end
 
-    describe "adding an attribute using a in-line sequence" do
+    describe "defining an attribute using a in-line sequence" do
       it "should create the sequence" do
         mock(Factory::Sequence).new
         @factory.sequence(:name) {}
       end
 
-      it "should add a dynamic attribute" do
+      it "should define a dynamic attribute" do
         attribute = 'attribute'
         stub(attribute).name { :name }
         mock(Factory::Attribute::Dynamic).new(:name, is_a(Proc)) { attribute }
@@ -90,7 +90,7 @@ describe Factory do
       end
     end
 
-    describe "after adding an attribute" do
+    describe "after defining an attribute" do
       before do
         @attribute = "attribute"
         @proxy     = "proxy"
@@ -102,7 +102,7 @@ describe Factory do
         stub(Factory::Attribute::Static).new { @attribute }
         stub(Factory::Proxy::Build).new { @proxy }
 
-        @factory.add_attribute(:name, 'value')
+        @factory.define_attribute(:name, 'value')
       end
 
       it "should create the right proxy using the build class when running" do
@@ -121,7 +121,7 @@ describe Factory do
       end
     end
 
-    it "should add an association without a factory name or overrides" do
+    it "should define an association without a factory name or overrides" do
       factory = Factory.new(:post)
       name    = :user
       attr    = 'attribute'
@@ -130,7 +130,7 @@ describe Factory do
       factory.attributes.should include(attr)
     end
 
-    it "should add an association with overrides" do
+    it "should define an association with overrides" do
       factory   = Factory.new(:post)
       name      = :user
       attr      = 'attribute'
@@ -140,7 +140,7 @@ describe Factory do
       factory.attributes.should include(attr)
     end
 
-    it "should add an association with a factory name" do
+    it "should define an association with a factory name" do
       factory = Factory.new(:post)
       attr = 'attribute'
       mock(Factory::Attribute::Association).new(:author, :user, {}) { attr }
@@ -148,7 +148,7 @@ describe Factory do
       factory.attributes.should include(attr)
     end
 
-    it "should add an association with a factory name and overrides" do
+    it "should define an association with a factory name and overrides" do
       factory = Factory.new(:post)
       attr = 'attribute'
       mock(Factory::Attribute::Association).new(:author, :user, :first_name => 'Ben') { attr }
@@ -163,7 +163,7 @@ describe Factory do
       }.should raise_error(Factory::AssociationDefinitionError)
     end
 
-    it "should add an attribute using the method name when passed an undefined method" do
+    it "should define an attribute using the method name when passed an undefined method" do
       attribute = 'attribute'
       stub(attribute).name { :name }
       block = lambda {}
@@ -180,18 +180,18 @@ describe Factory do
       end
 
       it "should return the overridden value in the generated attributes" do
-        @factory.add_attribute(@attr, 'The price is wrong, Bob!')
+        @factory.define_attribute(@attr, 'The price is wrong, Bob!')
         result = @factory.run(Factory::Proxy::AttributesFor, @hash)
         result[@attr].should == @value
       end
 
       it "should not call a lazy attribute block for an overridden attribute" do
-        @factory.add_attribute(@attr) { flunk }
+        @factory.define_attribute(@attr) { flunk }
         result = @factory.run(Factory::Proxy::AttributesFor, @hash)
       end
 
       it "should override a symbol parameter with a string parameter" do
-        @factory.add_attribute(@attr, 'The price is wrong, Bob!')
+        @factory.define_attribute(@attr, 'The price is wrong, Bob!')
         @hash = { @attr.to_s => @value }
         result = @factory.run(Factory::Proxy::AttributesFor, @hash)
         result[@attr].should == @value
@@ -200,7 +200,7 @@ describe Factory do
 
     describe "overriding an attribute with an alias" do
       before do
-        @factory.add_attribute(:test, 'original')
+        @factory.define_attribute(:test, 'original')
         Factory.alias(/(.*)_alias/, '\1')
         @result = @factory.run(Factory::Proxy::AttributesFor,
                                :test_alias => 'new')
