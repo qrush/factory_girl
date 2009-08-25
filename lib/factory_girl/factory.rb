@@ -273,11 +273,11 @@ class Factory
 
   def self.find_definitions #:nodoc:
     definition_file_paths.each do |path|
-      require("#{path}.rb") if File.exists?("#{path}.rb")
+      load("#{path}.rb") if File.exists?("#{path}.rb")
 
       if File.directory? path
         Dir[File.join(path, '*.rb')].each do |file|
-          require file
+          load file
         end
       end
     end

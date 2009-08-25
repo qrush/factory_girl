@@ -461,12 +461,12 @@ describe Factory do
       FileUtils.rm_rf(@tmp_dir)
     end
   end
-
-  def require_definitions_from(file)
+  
+  def load_definitions_from(file)
     simple_matcher do |given, matcher|
-      has_received = have_received.require(file)
+      has_received = have_received.load(file)
       result = has_received.matches?(given)
-      matcher.description = "require definitions from #{file}"
+      matcher.description = "load definitions from #{file}"
       matcher.failure_message = has_received.failure_message
       result
     end
@@ -474,7 +474,7 @@ describe Factory do
 
   share_examples_for "finds definitions" do
     before do
-      stub(Factory).require
+      stub(Factory).load
       Factory.find_definitions
     end
     subject { Factory }
@@ -483,28 +483,28 @@ describe Factory do
   describe "with factories.rb" do
     in_directory_with_files 'factories.rb'
     it_should_behave_like "finds definitions"
-    it { should require_definitions_from('factories.rb') }
+    it { should load_definitions_from('factories.rb') }
   end
 
   %w(spec test).each do |dir|
     describe "with a factories file under #{dir}" do
       in_directory_with_files File.join(dir, 'factories.rb')
       it_should_behave_like "finds definitions"
-      it { should require_definitions_from("#{dir}/factories.rb") }
+      it { should load_definitions_from("#{dir}/factories.rb") }
     end
 
     describe "with a factories file under #{dir}/factories" do
       in_directory_with_files File.join(dir, 'factories', 'post_factory.rb')
       it_should_behave_like "finds definitions"
-      it { should require_definitions_from("#{dir}/factories/post_factory.rb") }
+      it { should load_definitions_from("#{dir}/factories/post_factory.rb") }
     end
 
     describe "with several factories files under #{dir}/factories" do
       in_directory_with_files File.join(dir, 'factories', 'post_factory.rb'),
                               File.join(dir, 'factories', 'person_factory.rb')
       it_should_behave_like "finds definitions"
-      it { should require_definitions_from("#{dir}/factories/post_factory.rb") }
-      it { should require_definitions_from("#{dir}/factories/person_factory.rb") }
+      it { should load_definitions_from("#{dir}/factories/post_factory.rb") }
+      it { should load_definitions_from("#{dir}/factories/person_factory.rb") }
     end
 
     describe "with nested and unnested factories files under #{dir}" do
@@ -512,9 +512,9 @@ describe Factory do
                               File.join(dir, 'factories', 'post_factory.rb'),
                               File.join(dir, 'factories', 'person_factory.rb')
       it_should_behave_like "finds definitions"
-      it { should require_definitions_from("#{dir}/factories.rb") }
-      it { should require_definitions_from("#{dir}/factories/post_factory.rb") }
-      it { should require_definitions_from("#{dir}/factories/person_factory.rb") }
+      it { should load_definitions_from("#{dir}/factories.rb") }
+      it { should load_definitions_from("#{dir}/factories/post_factory.rb") }
+      it { should load_definitions_from("#{dir}/factories/person_factory.rb") }
     end
   end
 end
